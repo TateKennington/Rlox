@@ -29,6 +29,7 @@ fn main() {
                 line: 0
             }
         }
+        .print_rpn()
     );
     let args: Vec<_> = std::env::args().collect();
     println!("{:?}", args);

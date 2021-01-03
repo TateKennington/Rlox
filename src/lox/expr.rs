@@ -27,3 +27,16 @@ impl fmt::Display for Expr {
         }
     }
 }
+
+impl Expr {
+    pub fn print_rpn(&self) -> String {
+        match self {
+            Expr::Grouping(expr) => format!("{}", expr.print_rpn()),
+            Expr::Binary { left, right, op } => {
+                format!("{} {} {}", left.print_rpn(), right.print_rpn(), op.lexeme)
+            }
+            Expr::Literal(literal) => format!("{}", literal.lexeme),
+            Expr::Unary { right, op } => format!("{} {}", right.print_rpn(), op.lexeme),
+        }
+    }
+}
