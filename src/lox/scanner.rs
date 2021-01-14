@@ -41,6 +41,13 @@ impl Scanner {
         return true;
     }
 
+    fn peek_next(&self) -> &str {
+        if self.current + 1 >= self.source.len() {
+            return "\0";
+        }
+        self.source.get(self.current + 1..self.current + 2).unwrap()
+    }
+
     fn peek(&self) -> &str {
         if self.is_at_end() {
             return "\0";
@@ -81,7 +88,15 @@ impl Scanner {
         Scanner::is_alpha(c) || Scanner::is_digit(c)
     }
 
-    fn number(&mut self) {}
+    fn number(&mut self) {
+        while Scanner::is_digit(self.peek())
+            || (self.peek() == "." && Scanner::is_digit(self.peek_next()))
+        {
+            self.advance();
+        }
+        let lexeme = String::from(self.source.get(self.start..self.current).unwrap());
+        self.add_token(TokenType::Number(lexeme.parse().unwrap()))
+    }
 
     fn identifier(&mut self) {
         while Scanner::is_alphanum(self.peek()) && !self.is_at_end() {

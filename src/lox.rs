@@ -1,4 +1,5 @@
 pub mod expr;
+mod parser;
 mod scanner;
 pub mod tokens;
 
@@ -24,6 +25,11 @@ pub fn run(source: String) {
     for token in tokens.iter() {
         println!("{}", token);
     }
+
+    let mut parser = parser::Parser::new(tokens);
+    let expr = parser.parse();
+
+    println!("{}", expr);
 }
 
 pub fn error(line: usize, message: &str) {

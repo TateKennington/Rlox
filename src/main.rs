@@ -3,7 +3,7 @@ use lox::expr::Expr;
 use lox::tokens::{Token, TokenType};
 
 fn main() {
-    println!(
+    /* println!(
         "{}",
         Expr::Binary {
             left: Box::new(Expr::Unary {
@@ -30,7 +30,7 @@ fn main() {
             }
         }
         .print_rpn()
-    );
+    ); */
     let args: Vec<_> = std::env::args().collect();
     println!("{:?}", args);
     if args.len() > 2 {
