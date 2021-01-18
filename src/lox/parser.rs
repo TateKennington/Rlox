@@ -103,8 +103,9 @@ impl Parser {
             | TokenType::Number(_)
             | TokenType::String(_) => Expr::Literal(self.advance()),
             TokenType::LeftParen => {
+                self.advance();
                 let expr = self.expression();
-                if !matches!(self.peek().token_type, TokenType::RightParen) {
+                if !matches!(self.advance().token_type, TokenType::RightParen) {
                     println!("Err: mismatched paren");
                 }
                 return Expr::Grouping(Box::new(expr));
@@ -121,6 +122,9 @@ impl Parser {
     }
 
     fn advance(&mut self) -> Token {
+        if self.is_at_end() {
+            return self.peek();
+        }
         self.curr += 1;
         return self.previous();
     }

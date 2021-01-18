@@ -1,4 +1,5 @@
 pub mod expr;
+mod interpreter;
 mod parser;
 mod scanner;
 pub mod tokens;
@@ -30,6 +31,7 @@ pub fn run(source: String) {
     let expr = parser.parse();
 
     println!("{}", expr);
+    println!("{}", expr.interpret());
 }
 
 pub fn error(line: usize, message: &str) {
