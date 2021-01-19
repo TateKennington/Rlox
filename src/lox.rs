@@ -34,6 +34,21 @@ pub fn run(source: String) {
     println!("{}", expr.interpret());
 }
 
+pub fn evaluate_run(source: String) -> interpreter::Value {
+    let scn = scanner::Scanner::new(source);
+    let tokens = scn.scan_tokens();
+
+    for token in tokens.iter() {
+        println!("{}", token);
+    }
+
+    let mut parser = parser::Parser::new(tokens);
+    let expr = parser.parse();
+    let result = expr.interpret();
+
+    return result;
+}
+
 pub fn error(line: usize, message: &str) {
     report(line, "", message);
 }
