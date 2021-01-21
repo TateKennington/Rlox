@@ -35,7 +35,7 @@ impl Expr {
 
         match op.token_type {
             TokenType::Minus => Value::Number(-1.0 * Expr::get_number(right_val)),
-            TokenType::Bang => panic!("Not Implement: Unary Bang"),
+            TokenType::Bang => Value::Boolean(!Expr::is_truthy(right_val)),
             _ => panic!("Error: Expected Unary Operation"),
         }
     }
@@ -57,9 +57,7 @@ impl Expr {
 
         match op.token_type {
             //Arithmetic operations
-            TokenType::Plus => {
-                Value::Number(Expr::get_number(left_val) + Expr::get_number(right_val))
-            }
+            TokenType::Plus => Expr::interpret_plus(left_val, right_val),
             TokenType::Star => {
                 Value::Number(Expr::get_number(left_val) * Expr::get_number(right_val))
             }
@@ -70,14 +68,48 @@ impl Expr {
                 Value::Number(Expr::get_number(left_val) / Expr::get_number(right_val))
             }
             //Comparisons
-            TokenType::Less => panic!("Not Implemented: Binary Less"),
-            TokenType::LessEqual => panic!("Not Implemented: Binary LessEqual"),
-            TokenType::Greater => panic!("Not Implemented: Binary Greater"),
-            TokenType::GreaterEqual => panic!("Not Implemented: Binary GreaterEqual"),
+            TokenType::Less => {
+                Value::Boolean(Expr::get_number(left_val) < Expr::get_number(right_val))
+            }
+            TokenType::LessEqual => {
+                Value::Boolean(Expr::get_number(left_val) <= Expr::get_number(right_val))
+            }
+            TokenType::Greater => {
+                Value::Boolean(Expr::get_number(left_val) > Expr::get_number(right_val))
+            }
+            TokenType::GreaterEqual => {
+                Value::Boolean(Expr::get_number(left_val) >= Expr::get_number(right_val))
+            }
             //Equality
-            TokenType::EqualEqual => panic!("Not Implemented: Binary EqualEqual"),
-            TokenType::BangEqual => panic!("Not Implemented: Binary BangEqual"),
+            TokenType::EqualEqual => Value::Boolean(Expr::is_equal(left_val, right_val)),
+            TokenType::BangEqual => Value::Boolean(!Expr::is_equal(left_val, right_val)),
             _ => panic!("Error: Expected Binary Operation"),
+        }
+    }
+
+    fn interpret_plus(left_val: Value, right_val: Value) -> Value {
+        match (left_val, right_val) {
+            (Value::Number(left), Value::Number(right)) => Value::Number(left + right),
+            (Value::String(left), Value::String(right)) => {
+                Value::String(format!("{}{}", left, right))
+            }
+            _ => panic!(),
+        }
+    }
+
+    fn is_truthy(value: Value) -> bool {
+        match value {
+            Value::Boolean(false) | Value::Nil => false,
+            _ => true,
+        }
+    }
+
+    fn is_equal(left_val: Value, right_val: Value) -> bool {
+        match (left_val, right_val) {
+            (Value::Number(left), Value::Number(right)) => left == right,
+            (Value::String(left), Value::String(right)) => left == right,
+            (Value::Nil, Value::Nil) => true,
+            _ => false,
         }
     }
 

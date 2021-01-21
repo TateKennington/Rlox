@@ -14,5 +14,5 @@ extern "C" {
 #[wasm_bindgen]
 pub fn run(source: &str) -> JsValue {
     let result = lox::evaluate_run(String::from(source));
-    return JsValue::from_str(&format!("{}", result)[..]);
+    return JsValue::from_str(&format!("{}", result));
 }

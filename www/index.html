@@ -1,16 +1,81 @@
+---
+layout: default
+---
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
-    <title>Hello wasm-pack!</title>
+    <title>{{page.title}}</title>
+    <style>
+        .c-input-box {
+            display: flex;
+            flex-direction: column;
+            width: 300px;
+        }
+
+        .c-input-box #text-field {
+            flex-grow: 1;
+            border: 2px solid black;
+            border-right: none;
+        }
+
+        .c-input-box button {
+            border: 2px solid black;
+            border-right: none;
+            border-top: none;
+            height: 50px;
+        }
+
+        #results {
+            border: 2px solid black;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            width: 300px;
+            max-height: 100%;
+            overflow: auto;
+        }
+
+        #results p {
+            padding: 5px 10px;
+            border-bottom: 1px solid black;
+        }
+
+        #results p:nth-child(even) {
+            background-color: #CCCCCC;
+        }
+
+        #results p:nth-child(odd) {
+            background-color: #FFFFFF;
+        }
+
+        #run:hover {
+            background-color: #dddddd;
+            cursor: pointer;
+        }
+
+        section {
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            overflow: auto;
+            max-height: 100%;
+            height: 300px;
+        }
+    </style>
 </head>
 
 <body>
     <noscript>This page contains webassembly and javascript content, please enable javascript in your
         browser.</noscript>
     <script src="./bootstrap.js"></script>
-    <input type="text" id="text-field" />
+    <section>
+        <div class='c-input-box'>
+            <textarea type="text" id="text-field"></textarea>
+            <button id="run">Calculate</button>
+        </div>
+        <div id="results"></div>
+    </section>
 </body>
 
 </html>
