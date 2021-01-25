@@ -27,6 +27,7 @@ impl Expr {
             Expr::Unary { right, op } => Expr::interpret_unary(right, op),
             Expr::Grouping(expr) => expr.interpret(),
             Expr::Literal(token) => Expr::interpret_literal(token),
+            _ => panic!("Unsupported Expr"),
         }
     }
 
@@ -93,7 +94,7 @@ impl Expr {
             (Value::String(left), Value::String(right)) => {
                 Value::String(format!("{}{}", left, right))
             }
-            _ => panic!(),
+            _ => panic!("Mismatched arguments"),
         }
     }
 

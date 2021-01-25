@@ -1,7 +1,9 @@
+mod environment;
 pub mod expr;
 mod interpreter;
 mod parser;
 mod scanner;
+mod stmt;
 pub mod tokens;
 
 static mut HAD_ERROR: bool = false;
@@ -28,13 +30,15 @@ pub fn run(source: String) {
     }
 
     let mut parser = parser::Parser::new(tokens);
-    let expr = parser.parse();
+    let program = parser.parse();
 
-    println!("{}", expr);
-    println!("{}", expr.interpret());
+    program.iter().for_each(|stmt| {
+        println!("Stmt: {}", stmt);
+        stmt.interpret();
+    });
 }
 
-pub fn evaluate_run(source: String) -> interpreter::Value {
+pub fn evaluate_run(source: String) {
     let scn = scanner::Scanner::new(source);
     let tokens = scn.scan_tokens();
 
@@ -43,10 +47,7 @@ pub fn evaluate_run(source: String) -> interpreter::Value {
     }
 
     let mut parser = parser::Parser::new(tokens);
-    let expr = parser.parse();
-    let result = expr.interpret();
-
-    return result;
+    let program = parser.parse();
 }
 
 pub fn error(line: usize, message: &str) {

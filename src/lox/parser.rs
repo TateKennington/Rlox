@@ -1,5 +1,6 @@
 use crate::lox::{
     expr::Expr,
+    stmt::Stmt,
     tokens::{Token, TokenType},
 };
 
@@ -13,8 +14,48 @@ impl Parser {
         Parser { tokens, curr: 0 }
     }
 
-    pub fn parse(&mut self) -> Expr {
-        return self.expression();
+    pub fn parse(&mut self) -> Vec<Stmt> {
+        let mut program = vec![];
+        while !matches!(self.peek().token_type, TokenType::Eof) {
+            program.push(self.declaration());
+        }
+        return program;
+    }
+
+    fn declaration(&mut self) -> Stmt {
+        if matches!(self.peek().token_type, TokenType::Var) {
+            self.advance();
+            return self.variable_declaration();
+        }
+        return self.statement();
+    }
+
+    fn variable_declaration(&mut self) -> Stmt {
+        let identifier = self.advance();
+        if !matches!(identifier.token_type, TokenType::Identifier(_)) {
+            panic!("Expected Identifier")
+        }
+        if matches!(self.peek().token_type, TokenType::Equal) {
+            self.advance();
+            let initialiser = self.expression();
+            return Stmt::InitialisedVar(identifier, Box::new(initialiser));
+        }
+
+        return Stmt::Var(identifier);
+    }
+
+    fn statement(&mut self) -> Stmt {
+        let stmt = match self.peek().token_type {
+            TokenType::Print => {
+                self.advance();
+                Stmt::Print(Box::new(self.expression()))
+            }
+            _ => Stmt::Expression(Box::new(self.expression())),
+        };
+        if !matches!(self.advance().token_type, TokenType::Semicolon) {
+            panic!("Expected Semicolon")
+        }
+        return stmt;
     }
 
     fn expression(&mut self) -> Expr {
@@ -102,6 +143,7 @@ impl Parser {
             | TokenType::Nil
             | TokenType::Number(_)
             | TokenType::String(_) => Expr::Literal(self.advance()),
+            TokenType::Identifier(_) => Expr::Var(self.advance()),
             TokenType::LeftParen => {
                 self.advance();
                 let expr = self.expression();

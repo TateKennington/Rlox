@@ -13,6 +13,7 @@ pub enum Expr {
         right: Box<Expr>,
         op: Token,
     },
+    Var(Token),
 }
 
 impl fmt::Display for Expr {
@@ -24,6 +25,7 @@ impl fmt::Display for Expr {
             }
             Expr::Literal(literal) => write!(f, "{}", literal.lexeme),
             Expr::Unary { right, op } => write!(f, "({} {})", op.lexeme, right),
+            Expr::Var(token) => write!(f, "{}", token),
         }
     }
 }
@@ -37,6 +39,7 @@ impl Expr {
             }
             Expr::Literal(literal) => format!("{}", literal.lexeme),
             Expr::Unary { right, op } => format!("{} {}", right.print_rpn(), op.lexeme),
+            _ => panic!("Unsupported expression"),
         }
     }
 }
