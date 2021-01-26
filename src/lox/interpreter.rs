@@ -1,7 +1,9 @@
+use crate::lox::environment::Environment;
 use crate::lox::expr::Expr;
 use crate::lox::tokens::{Token, TokenType};
 use std::fmt;
 
+#[derive(Clone)]
 pub enum Value {
     Number(f32),
     String(String),
@@ -20,19 +22,39 @@ impl fmt::Display for Value {
     }
 }
 
-impl Expr {
-    pub fn interpret(&self) -> Value {
+impl fmt::Debug for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Expr::Binary { left, right, op } => Expr::interpret_binary(left, right, op),
-            Expr::Unary { right, op } => Expr::interpret_unary(right, op),
-            Expr::Grouping(expr) => expr.interpret(),
-            Expr::Literal(token) => Expr::interpret_literal(token),
+            Value::Number(value) => write!(f, "{}", value),
+            Value::String(value) => write!(f, "{}", value),
+            Value::Boolean(value) => write!(f, "{}", value),
+            Value::Nil => write!(f, "Nil"),
+        }
+    }
+}
+
+impl Expr {
+    pub fn interpret(&self, environment: &mut Environment) -> Value {
+        match self {
+            Expr::Binary { left, right, op } => {
+                Expr::interpret_binary(left, right, op, environment)
+            }
+            Expr::Unary { right, op } => Expr::interpret_unary(right, op, environment),
+            Expr::Grouping(expr) => expr.interpret(environment),
+            Expr::Literal(token) => Expr::interpret_literal(token, environment),
+            Expr::Var(token) => {
+                println!("Var Expression");
+                if let TokenType::Identifier(identifier) = &token.token_type {
+                    return environment.get_variable(identifier.to_string()).clone();
+                }
+                panic!("Expected Identifier")
+            }
             _ => panic!("Unsupported Expr"),
         }
     }
 
-    fn interpret_unary(right: &Expr, op: &Token) -> Value {
-        let right_val = right.interpret();
+    fn interpret_unary(right: &Expr, op: &Token, environment: &mut Environment) -> Value {
+        let right_val = right.interpret(environment);
 
         match op.token_type {
             TokenType::Minus => Value::Number(-1.0 * Expr::get_number(right_val)),
@@ -41,7 +63,7 @@ impl Expr {
         }
     }
 
-    fn interpret_literal(token: &Token) -> Value {
+    fn interpret_literal(token: &Token, environment: &mut Environment) -> Value {
         match &token.token_type {
             TokenType::Number(value) => Value::Number(*value),
             TokenType::String(value) => Value::String(value.clone()),
@@ -52,9 +74,14 @@ impl Expr {
         }
     }
 
-    fn interpret_binary(left: &Expr, right: &Expr, op: &Token) -> Value {
-        let left_val = left.interpret();
-        let right_val = right.interpret();
+    fn interpret_binary(
+        left: &Expr,
+        right: &Expr,
+        op: &Token,
+        environment: &mut Environment,
+    ) -> Value {
+        let left_val = left.interpret(environment);
+        let right_val = right.interpret(environment);
 
         match op.token_type {
             //Arithmetic operations

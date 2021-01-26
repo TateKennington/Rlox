@@ -38,10 +38,18 @@ impl Parser {
         if matches!(self.peek().token_type, TokenType::Equal) {
             self.advance();
             let initialiser = self.expression();
-            return Stmt::InitialisedVar(identifier, Box::new(initialiser));
+            let res = Stmt::InitialisedVar(identifier, Box::new(initialiser));
+            if !matches!(self.advance().token_type, TokenType::Semicolon) {
+                panic!("Expected Semicolon")
+            }
+            return res;
         }
 
-        return Stmt::Var(identifier);
+        let res = Stmt::Var(identifier);
+        if !matches!(self.advance().token_type, TokenType::Semicolon) {
+            panic!("Expected Semicolon")
+        }
+        return res;
     }
 
     fn statement(&mut self) -> Stmt {

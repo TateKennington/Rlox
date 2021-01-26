@@ -25,7 +25,7 @@ impl fmt::Display for Expr {
             }
             Expr::Literal(literal) => write!(f, "{}", literal.lexeme),
             Expr::Unary { right, op } => write!(f, "({} {})", op.lexeme, right),
-            Expr::Var(token) => write!(f, "{}", token),
+            Expr::Var(token) => write!(f, "Var {}", token),
         }
     }
 }

@@ -11,9 +11,13 @@ extern "C" {
     fn alert(s: &str);
 }
 
-/* #[wasm_bindgen]
+#[wasm_bindgen]
 pub fn run(source: &str) -> JsValue {
-    let result = lox::evaluate_run(String::from(source));
+    let mut result = String::new();
+    lox::run(
+        String::from(source),
+        &mut lox::environment::Environment::new(),
+        &mut result,
+    );
     return JsValue::from_str(&format!("{}", result));
 }
- */

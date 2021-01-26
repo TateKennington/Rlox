@@ -11,6 +11,5 @@ document.getElementById("run").onclick = (e) => {
         return;
     }
     result.innerHTML = wasm.run(source);
-    document.getElementById("text-field").value = '';
     document.getElementById("results").appendChild(result);
 }

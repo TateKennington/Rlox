@@ -1,4 +1,4 @@
-mod environment;
+pub mod environment;
 pub mod expr;
 mod interpreter;
 mod parser;
@@ -11,17 +11,26 @@ static mut HAD_ERROR: bool = false;
 pub fn run_prompt() {
     let stdin = std::io::stdin();
     let mut buffer = String::default();
+    let mut environment = environment::Environment::new();
+    let mut output = String::new();
     while stdin.read_line(&mut buffer).unwrap() != 0 {
-        run(buffer);
+        run(buffer, &mut environment, &mut output);
+        println!("{:?}", output);
+        output = String::new();
         buffer = String::default();
     }
 }
 
-pub fn run_file(path: &String) {
-    run(std::fs::read_to_string(path).unwrap());
+pub fn run_file(path: &String, output: &mut String) {
+    let mut environment = environment::Environment::new();
+    run(
+        std::fs::read_to_string(path).unwrap(),
+        &mut environment,
+        output,
+    );
 }
 
-pub fn run(source: String) {
+pub fn run(source: String, environment: &mut environment::Environment, output: &mut String) {
     let scn = scanner::Scanner::new(source);
     let tokens = scn.scan_tokens();
 
@@ -34,7 +43,7 @@ pub fn run(source: String) {
 
     program.iter().for_each(|stmt| {
         println!("Stmt: {}", stmt);
-        stmt.interpret();
+        stmt.interpret(environment, output);
     });
 }
 

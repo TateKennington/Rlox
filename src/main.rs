@@ -8,10 +8,10 @@ fn main() {
     if args.len() > 2 {
         println!("Usage: rlox [script]")
     } else if args.len() == 2 {
-        println!("Running {}", args[1]);
-        lox::run_file(&args[1]);
+        let mut result = String::new();
+        lox::run_file(&args[1], &mut result);
+        println!("{}", result);
     } else {
-        println!("Running Prompt");
         lox::run_prompt();
     }
 }
