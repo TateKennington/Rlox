@@ -8,10 +8,12 @@ pub mod tokens;
 
 static mut HAD_ERROR: bool = false;
 
+use std::rc::Rc;
+
 pub fn run_prompt() {
     let stdin = std::io::stdin();
     let mut buffer = String::default();
-    let mut environment = environment::Environment::new();
+    let mut environment = Rc::new(environment::Environment::new());
     let mut output = String::new();
     while stdin.read_line(&mut buffer).unwrap() != 0 {
         run(buffer, &mut environment, &mut output);
@@ -25,12 +27,12 @@ pub fn run_file(path: &String, output: &mut String) {
     let mut environment = environment::Environment::new();
     run(
         std::fs::read_to_string(path).unwrap(),
-        &mut environment,
+        &mut Rc::new(environment),
         output,
     );
 }
 
-pub fn run(source: String, environment: &mut environment::Environment, output: &mut String) {
+pub fn run(source: String, environment: &mut Rc<environment::Environment>, output: &mut String) {
     let scn = scanner::Scanner::new(source);
     let tokens = scn.scan_tokens();
 
@@ -41,10 +43,10 @@ pub fn run(source: String, environment: &mut environment::Environment, output: &
     let mut parser = parser::Parser::new(tokens);
     let program = parser.parse();
 
-    program.iter().for_each(|stmt| {
+    for stmt in program.iter() {
         println!("Stmt: {}", stmt);
         stmt.interpret(environment, output);
-    });
+    }
 }
 
 pub fn evaluate_run(source: String) {

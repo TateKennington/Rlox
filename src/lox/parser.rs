@@ -58,12 +58,27 @@ impl Parser {
                 self.advance();
                 Stmt::Print(Box::new(self.expression()))
             }
+            TokenType::LeftBrace => {
+                self.advance();
+                return Stmt::Block(Box::new(self.block()));
+            }
             _ => Stmt::Expression(Box::new(self.expression())),
         };
         if !matches!(self.advance().token_type, TokenType::Semicolon) {
             panic!("Expected Semicolon")
         }
         return stmt;
+    }
+
+    fn block(&mut self) -> Vec<Stmt> {
+        let mut res = vec![];
+        while !matches!(self.peek().token_type, TokenType::RightBrace) {
+            res.push(self.declaration());
+        }
+        if !matches!(self.advance().token_type, TokenType::RightBrace) {
+            panic!("Expected } at end of block")
+        }
+        return res;
     }
 
     fn expression(&mut self) -> Expr {

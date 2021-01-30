@@ -2,6 +2,7 @@ use crate::lox::environment::Environment;
 use crate::lox::expr::Expr;
 use crate::lox::tokens::{Token, TokenType};
 use std::fmt;
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub enum Value {
@@ -34,7 +35,7 @@ impl fmt::Debug for Value {
 }
 
 impl Expr {
-    pub fn interpret(&self, environment: &mut Environment) -> Value {
+    pub fn interpret(&self, environment: &Rc<Environment>) -> Value {
         match self {
             Expr::Binary { left, right, op } => {
                 Expr::interpret_binary(left, right, op, environment)
@@ -53,7 +54,7 @@ impl Expr {
         }
     }
 
-    fn interpret_unary(right: &Expr, op: &Token, environment: &mut Environment) -> Value {
+    fn interpret_unary(right: &Expr, op: &Token, environment: &Rc<Environment>) -> Value {
         let right_val = right.interpret(environment);
 
         match op.token_type {
@@ -63,7 +64,7 @@ impl Expr {
         }
     }
 
-    fn interpret_literal(token: &Token, environment: &mut Environment) -> Value {
+    fn interpret_literal(token: &Token, environment: &Rc<Environment>) -> Value {
         match &token.token_type {
             TokenType::Number(value) => Value::Number(*value),
             TokenType::String(value) => Value::String(value.clone()),
@@ -78,7 +79,7 @@ impl Expr {
         left: &Expr,
         right: &Expr,
         op: &Token,
-        environment: &mut Environment,
+        environment: &Rc<Environment>,
     ) -> Value {
         let left_val = left.interpret(environment);
         let right_val = right.interpret(environment);

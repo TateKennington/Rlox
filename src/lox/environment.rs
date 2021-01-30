@@ -1,9 +1,10 @@
 use crate::lox::interpreter::Value;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 pub struct Environment {
     variables: HashMap<String, Value>,
-    parent: Option<Box<Environment>>,
+    pub parent: Option<Rc<Environment>>,
 }
 
 impl Environment {
