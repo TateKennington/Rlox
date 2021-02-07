@@ -62,12 +62,38 @@ impl Parser {
                 self.advance();
                 return Stmt::Block(Box::new(self.block()));
             }
+            TokenType::If => {
+                return self.if_stmt();
+            }
             _ => Stmt::Expression(Box::new(self.expression())),
         };
         if !matches!(self.advance().token_type, TokenType::Semicolon) {
             panic!("Expected Semicolon")
         }
         return stmt;
+    }
+
+    fn if_stmt(&mut self) -> Stmt {
+        if !matches!(self.advance().token_type, TokenType::If) {
+            panic!("")
+        }
+        if !matches!(self.advance().token_type, TokenType::LeftParen) {
+            panic!("")
+        }
+        let condition = self.expression();
+        if !matches!(self.advance().token_type, TokenType::RightParen) {
+            panic!("")
+        }
+        let consequent = self.statement();
+        if matches!(self.peek().token_type, TokenType::Else) {
+            let alternate = self.statement();
+            return Stmt::If(
+                Box::new(condition),
+                Box::new(consequent),
+                Some(Box::new(alternate)),
+            );
+        }
+        return Stmt::If(Box::new(condition), Box::new(consequent), None);
     }
 
     fn block(&mut self) -> Vec<Stmt> {

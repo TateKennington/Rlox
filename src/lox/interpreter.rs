@@ -136,7 +136,7 @@ impl Expr {
         }
     }
 
-    fn is_truthy(value: Value) -> bool {
+    pub fn is_truthy(value: Value) -> bool {
         match value {
             Value::Boolean(false) | Value::Nil => false,
             _ => true,

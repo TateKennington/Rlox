@@ -14,6 +14,7 @@ pub enum Stmt {
     Var(Token),
     InitialisedVar(Token, Box<Expr>),
     Block(Box<Vec<Stmt>>),
+    If(Box<Expr>, Box<Stmt>, Option<Box<Stmt>>),
 }
 
 impl fmt::Display for Stmt {
@@ -24,6 +25,7 @@ impl fmt::Display for Stmt {
             Stmt::Var(token) => write!(f, "Var {}", token),
             Stmt::InitialisedVar(token, expr) => write!(f, "Init Var {} {}", token, expr),
             Stmt::Block(_) => write!(f, "Block Statement"),
+            Stmt::If(_, _, _) => write!(f, "If Statement"),
             _ => panic!("Unsupported Statement"),
         }
     }
@@ -64,6 +66,14 @@ impl<'a> Stmt {
                 let mut local = Rc::new(local);
                 for stmt in stmts.iter() {
                     stmt.interpret(&mut local, output);
+                }
+            }
+            Stmt::If(condition, consequent, alternate) => {
+                let condition = Expr::is_truthy(condition.interpret(environment));
+                if condition {
+                    consequent.interpret(environment, output);
+                } else if let Some(alternate) = alternate {
+                    alternate.interpret(environment, output);
                 }
             }
             _ => panic!("Unsupported Expression"),
