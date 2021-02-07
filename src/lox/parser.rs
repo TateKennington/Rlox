@@ -53,10 +53,14 @@ impl Parser {
     }
 
     fn statement(&mut self) -> Stmt {
-        let stmt = match self.peek().token_type {
+        match self.peek().token_type {
             TokenType::Print => {
                 self.advance();
-                Stmt::Print(Box::new(self.expression()))
+                let result = Stmt::Print(Box::new(self.expression()));
+                if !matches!(self.advance().token_type, TokenType::Semicolon) {
+                    panic!("Expected Semicolon")
+                }
+                return result;
             }
             TokenType::LeftBrace => {
                 self.advance();
@@ -65,12 +69,14 @@ impl Parser {
             TokenType::If => {
                 return self.if_stmt();
             }
-            _ => Stmt::Expression(Box::new(self.expression())),
-        };
-        if !matches!(self.advance().token_type, TokenType::Semicolon) {
-            panic!("Expected Semicolon")
+            _ => {
+                let result = Stmt::Expression(Box::new(self.expression()));
+                if !matches!(self.advance().token_type, TokenType::Semicolon) {
+                    panic!("Expected Semicolon")
+                }
+                return result;
+            }
         }
-        return stmt;
     }
 
     fn if_stmt(&mut self) -> Stmt {
@@ -86,6 +92,7 @@ impl Parser {
         }
         let consequent = self.statement();
         if matches!(self.peek().token_type, TokenType::Else) {
+            self.advance();
             let alternate = self.statement();
             return Stmt::If(
                 Box::new(condition),
