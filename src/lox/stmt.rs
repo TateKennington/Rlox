@@ -33,10 +33,10 @@ impl<'a> Stmt {
     pub fn interpret(&self, environment: &mut Rc<Environment>, output: &mut String) {
         match self {
             Stmt::Expression(expr) => {
-                expr.interpret(&environment);
+                expr.interpret(environment);
             }
             Stmt::Print(expr) => {
-                writeln!(output, "{}", expr.interpret(&environment));
+                writeln!(output, "{}", expr.interpret(environment));
             }
             Stmt::Var(token) => {
                 if let TokenType::Identifier(identifier) = &token.token_type {
@@ -49,7 +49,7 @@ impl<'a> Stmt {
             }
             Stmt::InitialisedVar(token, initialiser) => {
                 if let TokenType::Identifier(identifier) = &token.token_type {
-                    let value = initialiser.interpret(&environment);
+                    let value = initialiser.interpret(environment);
                     Rc::get_mut(environment)
                         .unwrap()
                         .set_variable(identifier.to_string(), value);

@@ -82,7 +82,20 @@ impl Parser {
     }
 
     fn expression(&mut self) -> Expr {
-        return self.equality();
+        return self.assignment();
+    }
+
+    fn assignment(&mut self) -> Expr {
+        let left = self.equality();
+        if matches!(self.peek().token_type, TokenType::Equal) {
+            self.advance();
+            let right = self.assignment();
+            if let Expr::Var(id) = left {
+                return Expr::Assignment(id, Box::new(right));
+            }
+            panic!("Invalid Assignment")
+        }
+        return left;
     }
 
     fn equality(&mut self) -> Expr {

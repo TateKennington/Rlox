@@ -14,6 +14,7 @@ pub enum Expr {
         op: Token,
     },
     Var(Token),
+    Assignment(Token, Box<Expr>),
 }
 
 impl fmt::Display for Expr {
@@ -26,6 +27,7 @@ impl fmt::Display for Expr {
             Expr::Literal(literal) => write!(f, "{}", literal.lexeme),
             Expr::Unary { right, op } => write!(f, "({} {})", op.lexeme, right),
             Expr::Var(token) => write!(f, "Var {}", token),
+            Expr::Assignment(token, right) => write!(f, "Assignment {} = {}", token.lexeme, right),
         }
     }
 }
