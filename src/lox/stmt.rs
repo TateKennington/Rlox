@@ -15,6 +15,7 @@ pub enum Stmt {
     InitialisedVar(Token, Box<Expr>),
     Block(Box<Vec<Stmt>>),
     If(Box<Expr>, Box<Stmt>, Option<Box<Stmt>>),
+    While(Box<Expr>, Box<Stmt>),
 }
 
 impl fmt::Display for Stmt {
@@ -26,13 +27,14 @@ impl fmt::Display for Stmt {
             Stmt::InitialisedVar(token, expr) => write!(f, "Init Var {} {}", token, expr),
             Stmt::Block(_) => write!(f, "Block Statement"),
             Stmt::If(_, _, _) => write!(f, "If Statement"),
+            Stmt::While(_, _) => write!(f, "While Statment"),
             _ => panic!("Unsupported Statement"),
         }
     }
 }
 
 impl<'a> Stmt {
-    pub fn interpret(&self, environment: &mut Rc<Environment>, output: &mut String) {
+    pub fn interpret(&self, environment: &mut Box<Environment>, output: &mut String) {
         match self {
             Stmt::Expression(expr) => {
                 expr.interpret(environment);
@@ -42,9 +44,7 @@ impl<'a> Stmt {
             }
             Stmt::Var(token) => {
                 if let TokenType::Identifier(identifier) = &token.token_type {
-                    Rc::get_mut(environment)
-                        .unwrap()
-                        .set_variable(identifier.to_string(), Value::Nil);
+                    environment.set_variable(identifier.to_string(), Value::Nil);
                 } else {
                     panic!("Expected Identifier");
                 }
@@ -52,9 +52,7 @@ impl<'a> Stmt {
             Stmt::InitialisedVar(token, initialiser) => {
                 if let TokenType::Identifier(identifier) = &token.token_type {
                     let value = initialiser.interpret(environment);
-                    Rc::get_mut(environment)
-                        .unwrap()
-                        .set_variable(identifier.to_string(), value);
+                    environment.set_variable(identifier.to_string(), value);
                     environment.print();
                 } else {
                     panic!("Expected Identifier");
@@ -63,10 +61,11 @@ impl<'a> Stmt {
             Stmt::Block(stmts) => {
                 let mut local = Environment::new();
                 local.parent = Some(environment.clone());
-                let mut local = Rc::new(local);
+                let mut local = Box::new(local);
                 for stmt in stmts.iter() {
                     stmt.interpret(&mut local, output);
                 }
+                std::mem::replace(environment, local);
             }
             Stmt::If(condition, consequent, alternate) => {
                 let condition = Expr::is_truthy(condition.interpret(environment));
@@ -74,6 +73,11 @@ impl<'a> Stmt {
                     consequent.interpret(environment, output);
                 } else if let Some(alternate) = alternate {
                     alternate.interpret(environment, output);
+                }
+            }
+            Stmt::While(condition, stmt) => {
+                while Expr::is_truthy(condition.interpret(environment)) {
+                    stmt.interpret(environment, output);
                 }
             }
             _ => panic!("Unsupported Expression"),

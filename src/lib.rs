@@ -1,6 +1,5 @@
 mod lox;
 
-use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 
 #[cfg(feature = "wee_alloc")]
@@ -17,7 +16,7 @@ pub fn run(source: &str) -> JsValue {
     let mut result = String::new();
     lox::run(
         String::from(source),
-        &mut Rc::new(lox::environment::Environment::new()),
+        &mut Box::new(lox::environment::Environment::new()),
         &mut result,
     );
     return JsValue::from_str(&format!("{}", result));

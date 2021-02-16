@@ -35,7 +35,7 @@ impl fmt::Debug for Value {
 }
 
 impl Expr {
-    pub fn interpret(&self, environment: &mut Rc<Environment>) -> Value {
+    pub fn interpret(&self, environment: &mut Box<Environment>) -> Value {
         match self {
             Expr::Binary { left, right, op } => {
                 Expr::interpret_binary(left, right, op, environment)
@@ -53,9 +53,7 @@ impl Expr {
             Expr::Assignment(token, right) => {
                 if let TokenType::Identifier(id) = token.token_type.clone() {
                     let result = right.interpret(environment);
-                    Rc::get_mut(environment)
-                        .unwrap()
-                        .set_variable(id, result.clone());
+                    environment.assign_variable(id, result.clone());
                     return result;
                 }
                 panic!("Expected Identifier")
@@ -64,7 +62,7 @@ impl Expr {
         }
     }
 
-    fn interpret_unary(right: &Expr, op: &Token, environment: &mut Rc<Environment>) -> Value {
+    fn interpret_unary(right: &Expr, op: &Token, environment: &mut Box<Environment>) -> Value {
         let right_val = right.interpret(environment);
 
         match op.token_type {
@@ -74,7 +72,7 @@ impl Expr {
         }
     }
 
-    fn interpret_literal(token: &Token, environment: &Rc<Environment>) -> Value {
+    fn interpret_literal(token: &Token, environment: &mut Box<Environment>) -> Value {
         match &token.token_type {
             TokenType::Number(value) => Value::Number(*value),
             TokenType::String(value) => Value::String(value.clone()),
@@ -89,7 +87,7 @@ impl Expr {
         left: &Expr,
         right: &Expr,
         op: &Token,
-        environment: &mut Rc<Environment>,
+        environment: &mut Box<Environment>,
     ) -> Value {
         let left_val = left.interpret(environment);
         let right_val = right.interpret(environment);

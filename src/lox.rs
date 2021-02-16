@@ -13,7 +13,7 @@ use std::rc::Rc;
 pub fn run_prompt() {
     let stdin = std::io::stdin();
     let mut buffer = String::default();
-    let mut environment = Rc::new(environment::Environment::new());
+    let mut environment = Box::new(environment::Environment::new());
     let mut output = String::new();
     while stdin.read_line(&mut buffer).unwrap() != 0 {
         run(buffer, &mut environment, &mut output);
@@ -27,18 +27,18 @@ pub fn run_file(path: &String, output: &mut String) {
     let mut environment = environment::Environment::new();
     run(
         std::fs::read_to_string(path).unwrap(),
-        &mut Rc::new(environment),
+        &mut Box::new(environment),
         output,
     );
 }
 
-pub fn run(source: String, environment: &mut Rc<environment::Environment>, output: &mut String) {
+pub fn run(source: String, environment: &mut Box<environment::Environment>, output: &mut String) {
     let scn = scanner::Scanner::new(source);
     let tokens = scn.scan_tokens();
 
-    for token in tokens.iter() {
+    /* for token in tokens.iter() {
         println!("{}", token);
-    }
+    } */
 
     let mut parser = parser::Parser::new(tokens);
     let program = parser.parse();

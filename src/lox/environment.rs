@@ -1,10 +1,10 @@
 use crate::lox::interpreter::Value;
 use std::collections::HashMap;
-use std::rc::Rc;
 
+#[derive(Clone)]
 pub struct Environment {
     variables: HashMap<String, Value>,
-    pub parent: Option<Rc<Environment>>,
+    pub parent: Option<Box<Environment>>,
 }
 
 impl Environment {
@@ -28,6 +28,17 @@ impl Environment {
             return self.parent.as_ref().unwrap().get_variable(identifier);
         }
         return &Value::Nil;
+    }
+
+    pub fn assign_variable(&mut self, identifier: String, value: Value) {
+        if self.variables.contains_key(&identifier) {
+            self.variables.insert(identifier, value);
+            return;
+        }
+        match &mut self.parent {
+            Some(parent) => parent.assign_variable(identifier, value),
+            _ => panic!(""),
+        };
     }
 
     pub fn print(&self) {

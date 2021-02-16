@@ -69,6 +69,9 @@ impl Parser {
             TokenType::If => {
                 return self.if_stmt();
             }
+            TokenType::While => {
+                return self.while_stmt();
+            }
             _ => {
                 let result = Stmt::Expression(Box::new(self.expression()));
                 if !matches!(self.advance().token_type, TokenType::Semicolon) {
@@ -77,6 +80,21 @@ impl Parser {
                 return result;
             }
         }
+    }
+
+    fn while_stmt(&mut self) -> Stmt {
+        if !matches!(self.advance().token_type, TokenType::While) {
+            panic!("")
+        }
+        if !matches!(self.advance().token_type, TokenType::LeftParen) {
+            panic!("")
+        }
+        let condition = self.expression();
+        if !matches!(self.advance().token_type, TokenType::RightParen) {
+            panic!("")
+        }
+        let consequent = self.statement();
+        return Stmt::While(Box::new(condition), Box::new(consequent));
     }
 
     fn if_stmt(&mut self) -> Stmt {
